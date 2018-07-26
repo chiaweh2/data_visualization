@@ -1,6 +1,8 @@
 #!python
 
 import numpy as np
+import datetime
+import pandas as pd
 
 class time_convert:
     """
@@ -63,9 +65,38 @@ class time_convert:
         year_month_str=[]
         i=0
         for m in mon:
-            mon_ind=np.where(np.abs(mon1year-m)<1E-8)[0]
+            mon_ind=np.where(np.abs(mon1year-m)<1E-8)[0][0]
             month.append(mon_ind+1)
             year_month_str.append("%0.4i-%0.2i"%(year[i],month[i]))
             i+=1
+        year=np.squeeze(np.array(year,dtype=int))
+        month=np.squeeze(np.array(month,dtype=int))        
+            
+        return {'year': year,'month': month, 'string':year_month_str}
+    
+    
 
-        return {'year':year,'month': month, 'string':year_month_str}
+def tarray_month(itime,ftime):
+    """
+    Parameters:
+        itime: list 
+            in the order of [year,month]
+        ftime: list 
+            in the order of [year,month]
+    Returns:
+        time : pd.indexes.timeindex
+            time index in the form of pandas time index array
+
+    """
+    itime=np.array(itime,dtype=int)
+    ftime=np.array(ftime,dtype=int)
+    ini = datetime.datetime(itime[0],itime[1],1)
+    fin = datetime.datetime(ftime[0],ftime[1],1)
+    nmonth=((ftime[0]-1)-itime[0])*12+(12-itime[1]+1)+ftime[1]
+    # 1st each month will be the output date
+    time = pd.date_range(ini, freq='MS', periods=nmonth)
+    # change array from 1st to 15th in each month 
+    dtime=datetime.timedelta(days=14)
+    time=time+dtime
+
+    return time
