@@ -34,17 +34,22 @@ class ncdf_io :
 
     """
     
-    def __init__ (self,filename):
+    def __init__ (self,filename,verbose=1):
         """
         Parameters:
             filename: string, 
                 must input file name and path for the IO file      
+            verbose: np.int, kwarg
+                must input integer to show detail of the netcdf header
+                0 for no output
+                1 for output dim, var name and size 
         Attributes:
             self.path: string, 
                 the IO file location
         """
 
         self.path=filename
+        self.verbose=verbose
         
     def read_ncdf(self,var=[],dimorder=[],ncformat='NETCDF4_CLASSIC'):
         """
@@ -89,10 +94,11 @@ class ncdf_io :
         ndim=len(dimname)
         indexorder=[]
         if dimorder != []:
-            print '\n'
-            print "!!!!! Variable dimension is reodered !!!!!"
-            print " Original order       :", dimname
-            print " Base on user setting :", dimorder
+            if self.verbose > 0:
+                print '\n'
+                print "!!!!! Variable dimension is reodered !!!!!"
+                print " Original order       :", dimname
+                print " Base on user setting :", dimorder
             for i in range(len(dimorder)):
                 for j in range(len(dimname)):
                     if dimorder[i] in dimname[j]:
@@ -101,18 +107,24 @@ class ncdf_io :
             indexorder=range(ndim)
         
         # read in dimensions 
-        print '\n'
-        print '#   ncfile dimensions '
-        print '----------------------------------'
+        if self.verbose > 0:
+            print '\n'
+            print '#   ncfile dimensions '
+            print '----------------------------------'
         dim_dict = OrderedDict() # to keep the order of the dimension listed in the dict as set
-        for i in indexorder:
-            dim_dict[dimname[i]]=np.array(rootgrp.variables[dimname[i]][:])
-            print dimname[i],len(dim_dict[dimname[i]])
-
+        if self.verbose > 0:
+            for i in indexorder:
+                dim_dict[dimname[i]]=np.array(rootgrp.variables[dimname[i]][:])
+                print dimname[i],len(dim_dict[dimname[i]])
+        else:
+            for i in indexorder:
+                dim_dict[dimname[i]]=np.array(rootgrp.variables[dimname[i]][:])
+                
         # read in variables
-        print '\n'
-        print '#   ncfile variables '
-        print '----------------------------------'
+        if self.verbose > 0:
+            print '\n'
+            print '#   ncfile variables '
+            print '----------------------------------'
         nvar=len(varname)
         var_dict={}
 
@@ -125,8 +137,9 @@ class ncdf_io :
                 if varname[i] not in dimname :
                     var_dict[varname[i]]=np.array(rootgrp.variables[varname[i]][:])
                     var_dict[varname[i]]=np.transpose(var_dict[varname[i]],indexorder)
-                    print varname[i],var_dict[varname[i]].shape
-                    print "    dim:",[dimname[ind] for ind in indexorder]
+                    if self.verbose > 0:
+                        print varname[i],var_dict[varname[i]].shape
+                        print "    dim:",[dimname[ind] for ind in indexorder]
 
             # output varname listed in var
             else :
@@ -134,8 +147,9 @@ class ncdf_io :
                 if varname[i] not in dimname and varname[i] in var:
                     var_dict[varname[i]]=np.array(rootgrp.variables[varname[i]][:])
                     var_dict[varname[i]]=np.transpose(var_dict[varname[i]],indexorder)
-                    print varname[i],var_dict[varname[i]].shape
-                    print "    dim:",[dimname[ind] for ind in indexorder]
+                    if self.verbose > 0:
+                        print varname[i],var_dict[varname[i]].shape
+                        print "    dim:",[dimname[ind] for ind in indexorder]
 
         return dim_dict, var_dict
 
@@ -184,12 +198,13 @@ class ncdf_io :
         dimname = [v[0] for v in dim_dict.items()]
         
         # store each variable as a var
-        ds=xr.DataArray(var_dict[varname[0]], 
-                        coords=dim_dict,dims=dimname).to_dataset(name=varname[0])
+        dict1={}
+        for i in np.arange(nvar):
+            dict1[varname[i]]=(dimname,var_dict[varname[i]])
+        ds=xr.Dataset(dict1,coords=dim_dict)    
         
-        for i in np.arange(nvar-1)+1:
-            ds[varname[i]]=var_dict[varname[i]]
-        return ds
+        return ds        
+        
 
 
 
