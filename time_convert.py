@@ -74,6 +74,59 @@ class time_convert:
             
         return {'year': year,'month': month, 'string':year_month_str}
     
+    def gmonth2year_mon(self):
+        """
+        This method is changing the GRACE month to the corresponding 
+        year month in the form of datetime
+
+        Output year, month, string (year-month)      
+        The method output variable in the form of dictionary of all three variables
+
+        Returns: a dictionary
+            year : numpy array 
+                contain the year value for all element in the xaxis array 
+            month : numpy array
+                contain the month value for all element in the xaxis array 
+            string : list of string
+                contain the "year-month" string for all element in the xaxis array 
+
+        """
+        gmonth=self.origin_fmt
+        # GRACE month start from Jan 2002
+        year=np.array(gmonth,dtype=int)/12
+        mon=gmonth-year*12
+        year[np.where(mon==0)]=year[np.where(mon==0)]-1
+        mon[np.where(mon==0)]=12
+        year=year+2002
+        year_month_str=["%0.4i-%0.2i"%(year[i],mon[i]) for i in range(len(year))]
+        year=np.squeeze(np.array(year,dtype=int))
+        month=np.squeeze(np.array(mon,dtype=int))        
+
+        return {'year': year,'month': month, 'string':year_month_str}    
+    
+    
+    def tarray_month2year(self):
+        """
+        This method is changing the GRACE month to the corresponding 
+        year month in the form of datetime
+
+        Output year, month, string (year-month)      
+        The method output variable in the form of dictionary of all three variables
+
+        Returns: a dictionary
+            year : numpy array 
+                contain the year value for all element in the xaxis array 
+            month : numpy array
+                contain the month value for all element in the xaxis array 
+            string : list of string
+                contain the "year-month" string for all element in the xaxis array 
+
+        """
+        tarray=self.origin_fmt
+        yeardate=(np.array(tarray.dt.month)-1)/12.+1/24.+np.array(tarray.dt.year)
+
+        return yeardate
+    
     
 
 def tarray_month(itime,ftime):
@@ -100,3 +153,8 @@ def tarray_month(itime,ftime):
     time=time+dtime
 
     return time
+
+
+    
+    
+    

@@ -157,7 +157,7 @@ class ncdf_io :
     
     def read_ncdf2xarray(self,var=[],dimorder=[],ncformat='NETCDF4_CLASSIC'):
         """
-        The method output variable in the form of dictionary
+        The method output variable in the form of Xarray.Dataset
 
         Parameters:
             filename: string

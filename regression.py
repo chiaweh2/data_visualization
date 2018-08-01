@@ -9,6 +9,11 @@ class regress :
     The class is created to be more generic in importing different number of variate
     when performing multi-variate regression. 
     
+    method :
+        1) multivar_regress
+        2) def_vars
+    
+    
     """
     
     def __init__(self, axis, axis_rel=0., err_weighted='N',err=1.):
